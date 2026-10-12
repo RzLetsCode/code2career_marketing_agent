@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential
 from langchain_openai import AzureChatOpenAI
@@ -8,22 +8,27 @@ from core.logger import logger
 
 
 class Slide(BaseModel):
-    slide_num: int = Field(description="Slide number (1 to 5)")
-    tag: str = Field(description="Uppercase badge, e.g., 'THE TRAP', 'ARCHITECTURE', 'ENTERPRISE PATTERN', 'ROADMAP', 'ACTION'")
-    headline: str = Field(description="Punchy, bold hook. Maximum 6 words.")
-    content: str = Field(description="High-density explanation, architecture insight, or blueprint. Maximum 28 words.")
+    slide_num: int = Field(description="Slide index from 1 to 5")
+    tag: str = Field(description="Uppercase badge, e.g., 'THE HARSH TRUTH', 'THE JUNIOR TRAP', 'ARCHITECTURE MATRIX', 'PRODUCTION BLUEPRINT', 'ACTION'")
+    headline: str = Field(description="Bold hook, strictly 6 words maximum")
+    content: str = Field(description="Direct, high-density takeaway. Max 26 words.")
+    # Structured fields for Slide 3 high-save comparison matrix
+    left_column_title: Optional[str] = Field(default=None, description="E.g., 'TOY TUTORIAL (REJECTED)'")
+    left_column_points: Optional[List[str]] = Field(default=None, description="2 bullet points of failure/naive patterns")
+    right_column_title: Optional[str] = Field(default=None, description="E.g., 'ENTERPRISE PATTERN (HIRED)'")
+    right_column_points: Optional[List[str]] = Field(default=None, description="2 bullet points of production engineering")
 
 
 class CarouselPost(BaseModel):
     pillar: str = Field(description="Category: Architecture Teardown, Portfolio Rescue, or Production Roadmap")
-    topic: str = Field(description="Contrarian topic title targeting AI engineers")
-    slides: List[Slide] = Field(description="Exact sequence of 5 slides")
-    caption: str = Field(description="Instagram caption formatted with bullet points, value teardown, and DM call-to-action")
-    trigger_keyword: str = Field(description="Single uppercase keyword for comments/DMs, e.g., 'BLUEPRINT', 'STATEMACHINE', 'EVALS'")
+    topic: str = Field(description="Contrarian, clickable topic title")
+    slides: List[Slide] = Field(description="Exact list of 5 slides")
+    caption: str = Field(description="Instagram caption with formatting, actionable engineering breakdown, and DM keyword trigger")
+    trigger_keyword: str = Field(description="Single uppercase trigger keyword, e.g., 'BLUEPRINT', 'STATEMACHINE', 'EVALS', 'MCP'")
 
 
 class StrategistAgent:
-    """Formulates high-engagement educational carousel strategies using Azure OpenAI."""
+    """Formulates high-converting educational carousels using Azure OpenAI."""
 
     def __init__(self):
         self.llm = AzureChatOpenAI(
@@ -41,31 +46,26 @@ class StrategistAgent:
 
         system_prompt = (
             "You are the Lead Enterprise AI Architect and Chief Educator at Code2Career_AI.\n"
-            "Your audience: CS students, junior software developers, and aspiring AI engineers stuck in 'tutorial hell' "
-            "(building basic LangChain PDF chat wrappers) and getting ignored by recruiters.\n\n"
-            "CONTENT FORMULAS (Select the best fit for today's market signal):\n"
-            "1. THE 'STOP DOING THIS' TEARDOWN: Debunk an entry-level practice that fails in production (e.g., naive vector search, prompt-based validation).\n"
-            "2. TOY DEMO VS. PRODUCTION ARCHITECTURE: Contrast basic linear code with enterprise architecture (e.g., chains vs. LangGraph state machines, simple chunking vs. hybrid search + rerankers).\n"
-            "3. THE ZERO-BS INTERVIEW BLUEPRINT: What hiring managers look for in production AI GitHub repos (eval benchmarks, observability, token cost controls).\n"
-            "4. HIGH-LEVERAGE PRODUCTION ROADMAP: 3 production-grade systems to master instead of 10 shallow demo libraries.\n\n"
-            "STRICT CONSTRAINTS:\n"
-            "- Exactly 5 slides.\n"
-            "- Slide 1: Bold contrarian hook challenging a beginner belief.\n"
-            "- Slide 2: The beginner trap/mistake that breaks in enterprise scale.\n"
-            "- Slide 3: The production architecture pattern or engineering fix.\n"
-            "- Slide 4: A concrete 3-step action plan or implementation roadmap.\n"
-            "- Slide 5: CTA asking readers to comment the trigger keyword to get the free architecture guide/code template in DMs.\n"
-            "- Slide content must be technical, dense, and strictly under 28 words per slide."
+            "Your audience consists of CS students, junior developers, and early-career software engineers "
+            "trapped in tutorial hell (building naive LangChain PDF wrappers) and failing senior technical interviews.\n\n"
+            "GROWTH & ALGORITHM RETENTION RULES:\n"
+            "- Slide 1: Bold contrarian hook exposing an industry misconception or broken beginner habit.\n"
+            "- Slide 2: The beginner trap/mistake that fails in enterprise production (silent hallucinations, token blowups, fragile prompt logic).\n"
+            "- Slide 3: MUST BE A COMPARISON MATRIX. You MUST populate left_column_title, left_column_points (2 items), "
+            "right_column_title, and right_column_points (2 items) to create a high-save contrast between toy demos and enterprise architecture.\n"
+            "- Slide 4: A concrete 3-step action roadmap to implement the fix.\n"
+            "- Slide 5: High-converting CTA asking users to comment the 1-word trigger keyword to receive the free architecture starter repo and Notion checklist in DMs.\n"
+            "- Slide text must be concise, technical, and strictly under 26 words per slide."
         )
 
         user_prompt = f"""
-LIVE MARKET SIGNALS FOUND:
+LIVE DEVELOPER MARKET SIGNALS (Hacker News & GitHub):
 {market_signals}
 
-RECENTLY PUBLISHED TOPICS (DO NOT DUPLICATE OR CLOSELY REPEAT):
+RECENTLY PUBLISHED TOPICS (DO NOT REPEAT OR CLOSELY DUPLICATE):
 {past_topics[-15:]}
 
-Generate a viral, highly technical carousel post tailored for @code2career_ai.
+Generate a viral, technically rigorous 5-slide carousel post.
 """
 
         result = structured_llm.invoke([
@@ -73,9 +73,8 @@ Generate a viral, highly technical carousel post tailored for @code2career_ai.
             HumanMessage(content=user_prompt)
         ])
 
-        logger.info(f"Generated Carousel Topic: '{result.topic}' [{result.pillar}]")
+        logger.info(f"Generated Carousel Topic: '{result.topic}' [{result.pillar}] | Trigger: {result.trigger_keyword}")
         return result
 
 
-# Export both names to prevent import mismatches
 MarketingStrategist = StrategistAgent
