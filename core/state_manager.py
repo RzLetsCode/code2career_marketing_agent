@@ -76,7 +76,7 @@ class StateManager:
             "trigger_keyword": keyword.strip().upper()
         })
 
-        # Atomic write to prevent file corruption during OS process termination
+        # Atomic write prevents file corruption
         dir_name = os.path.dirname(os.path.abspath(self.filepath))
         with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tf:
             json.dump(data, tf, indent=2, ensure_ascii=False)
