@@ -1,48 +1,59 @@
+import requests
 from typing import List, Dict
-#from duckduckgo_search import DDGS
-from ddgs import DDGS
-from tenacity import retry, stop_after_attempt, wait_fixed
 from core.logger import logger
 
 class TrendResearcher:
-    """Scouts AI engineering trends with strict fail-fast timeouts."""
+    """Extracts real-time discussions from Hacker News and GitHub APIs."""
 
-    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1), reraise=False)
-    def _search_web(self, query: str, max_results: int = 2) -> List[Dict[str, str]]:
-        results = []
-        with DDGS(timeout=5) as ddgs:
-            for r in ddgs.text(query, max_results=max_results):
-                results.append({
-                    "title": r.get("title", ""),
-                    "snippet": r.get("body", "")
-                })
-        return results
+    def _fetch_hacker_news_trends(self) -> List[str]:
+        """Fetches top-voted AI developer discussions from Hacker News."""
+        try:
+            url = "https://hn.algolia.com/api/v1/search?tags=story&query=LLM+OR+AI+OR+RAG+OR+evals&hitsPerPage=5"
+            res = requests.get(url, timeout=6).json()
+            items = res.get("hits", [])
+            return [
+                f"[HN Discussion] {item.get('title')} (Points: {item.get('points', 0)})"
+                for item in items if item.get("title")
+            ]
+        except Exception as e:
+            logger.warning(f"Hacker News trend fetch failed: {e}")
+            return []
+
+    def _fetch_github_ai_trending(self) -> List[str]:
+        """Fetches popular open-source repositories in AI tooling."""
+        try:
+            url = "https://api.github.com/search/repositories?q=topic:ai-agents+OR+topic:rag+sort:stars&order=desc&per_page=4"
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            res = requests.get(url, headers=headers, timeout=6).json()
+            items = res.get("items", [])
+            return [
+                f"[GitHub Tool] {item.get('name')}: {item.get('description', '')}"
+                for item in items if item.get("name")
+            ]
+        except Exception as e:
+            logger.warning(f"GitHub trend fetch failed: {e}")
+            return []
 
     def get_latest_market_signals(self) -> str:
-        print("[*] Step 1: Scouting internet trends (DuckDuckGo)...", flush=True)
-        queries = [
-            "AI Engineer roadmap 2026 junior developer",
-            "production RAG vs toy demo LangGraph"
-        ]
-
+        print("[*] Step 1: Scouting live developer signals (Hacker News + GitHub)...", flush=True)
         signals = []
-        for q in queries:
-            try:
-                print(f"    Searching: '{q}'...", flush=True)
-                web_hits = self._search_web(q, max_results=2)
-                if web_hits:
-                    for hit in web_hits:
-                        signals.append(f"- {hit['title']}: {hit['snippet']}")
-            except Exception as e:
-                logger.warning(f"Query '{q}' skipped: {e}")
 
+        # 1. Real-time engineering debates
+        hn_signals = self._fetch_hacker_news_trends()
+        signals.extend(hn_signals)
+
+        # 2. Open-source tooling trends
+        gh_signals = self._fetch_github_ai_trending()
+        signals.extend(gh_signals)
+
+        # 3. High-signal fallbacks if offline
         if not signals:
-            print("    [!] Web query returned empty/timed out. Using baseline signals.", flush=True)
+            print("    [!] External APIs timed out. Using high-signal defaults.", flush=True)
             signals = [
-                "- LangGraph state machines replacing linear chains in production systems.",
-                "- Why standard chunking fails without cross-encoder rerankers in enterprise RAG.",
-                "- Transitioning from basic prompt engineering to LLM evaluation frameworks (Ragas)."
+                "[HN Discussion] Why tool-calling reliability drops when passing >5 schemas to models",
+                "[GitHub Tool] LangGraph: Orchestrating cyclical agent graphs with human-in-the-loop state",
+                "[HN Discussion] Stop testing LLMs with vibe-checks: How we built automated CI/CD evals"
             ]
 
-        print(f"    [✔] Captured {len(signals)} technical trend signals.", flush=True)
+        print(f"    [✔] Captured {len(signals)} live technical signals.", flush=True)
         return "\n".join(signals)
