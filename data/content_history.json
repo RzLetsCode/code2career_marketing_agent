@@ -6,7 +6,8 @@
       "status": "seeded"
     },
     "Why Your RAG Pipeline Fails at Scale",
-    "LangChain Agents: Why Most Crash in Production"
+    "LangChain Agents: Why Most Crash in Production",
+    "Why Naive LLM Evaluation Fails in Production"
   ],
   "logs": [
     {
@@ -18,6 +19,12 @@
       "topic": "LangChain Agents: Why Most Crash in Production",
       "media_id": "18440793298178759",
       "trigger_keyword": "GRAPH"
+    },
+    {
+      "timestamp": "2026-10-12T21:38:06.257188+00:00",
+      "topic": "Why Naive LLM Evaluation Fails in Production",
+      "media_id": "18034327370895526",
+      "trigger_keyword": "EVALS"
     }
   ]
 }
