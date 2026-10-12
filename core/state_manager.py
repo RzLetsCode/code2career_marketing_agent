@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from datetime import datetime
 from typing import List, Dict, Any
 from config.settings import settings
 from core.logger import logger
@@ -17,33 +18,38 @@ class StateManager:
                 json.dump({"published_topics": [], "logs": []}, f, indent=2)
 
     def get_published_topics(self) -> List[str]:
+        """Extracts clean topic strings whether stored as raw strings or objects."""
         try:
             with open(self.filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                if isinstance(data, list):
-                    return [str(item) for item in data]
-                elif isinstance(data, dict):
-                    return data.get("published_topics", [])
-                return []
+                raw_topics = data.get("published_topics", [])
+                
+                clean_topics = []
+                for item in raw_topics:
+                    if isinstance(item, str):
+                        clean_topics.append(item.strip())
+                    elif isinstance(item, dict) and "topic" in item:
+                        clean_topics.append(item["topic"].strip())
+                return clean_topics
         except Exception as e:
             logger.error(f"Failed to read state file: {e}")
             return []
 
     def record_publication(self, topic: str, media_id: str, keyword: str):
+        """Saves a structured log and updates published_topics."""
         try:
             with open(self.filepath, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-                if isinstance(raw, list):
-                    data = {"published_topics": raw, "logs": []}
-                elif isinstance(raw, dict):
-                    data = raw
-                else:
-                    data = {"published_topics": [], "logs": []}
+                data = json.load(f)
         except Exception:
             data = {"published_topics": [], "logs": []}
 
-        data.setdefault("published_topics", []).append(topic)
+        # Keep published_topics as clean strings for simple deduplication
+        if topic not in data.get("published_topics", []):
+            data.setdefault("published_topics", []).append(topic)
+
+        # Keep rich history in logs
         data.setdefault("logs", []).append({
+            "date": datetime.utcnow().strftime("%Y-%m-%d"),
             "topic": topic,
             "media_id": media_id,
             "trigger_keyword": keyword
@@ -55,4 +61,4 @@ class StateManager:
             temp_name = tf.name
 
         os.replace(temp_name, self.filepath)
-        logger.info(f"State updated: Topic '{topic}' saved atomically.")
+        logger.info(f"State saved cleanly: '{topic}'")
