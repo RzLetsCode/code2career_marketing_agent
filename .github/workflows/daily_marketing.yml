@@ -2,15 +2,15 @@ name: Daily Autonomous Instagram Marketing
 
 on:
   schedule:
-    # Runs daily at 15:00 UTC (8:30 PM IST)
+    # 15:00 UTC = 8:30 PM IST
     - cron: '0 15 * * *'
-  workflow_dispatch: # Allows manual trigger anytime from GitHub UI
+  workflow_dispatch:
 
 jobs:
   run-agent:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grants permissions to commit updated state
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -27,9 +27,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Playwright & OS Dependencies
+      - name: Install Playwright Chromium
         run: |
-          playwright install --with-deps chromium
+          playwright install chromium
 
       - name: Execute Autonomous Marketing Agent
         env:
@@ -43,7 +43,7 @@ jobs:
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
         run: |
-          python orchestrator.py
+          python -u orchestrator.py
 
       - name: Commit State History Back to Repo
         run: |
