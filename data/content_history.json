@@ -9,7 +9,8 @@
     "LangChain Agents: Why Most Crash in Production",
     "Why Naive LLM Evaluation Fails in Production",
     "Why LLM Monitoring Is NOT Optional",
-    "LLM “App Builders” Are NOT Enterprise-Ready"
+    "LLM “App Builders” Are NOT Enterprise-Ready",
+    "Why Your LLM App Lacks Observability"
   ],
   "logs": [
     {
@@ -39,6 +40,12 @@
       "topic": "LLM “App Builders” Are NOT Enterprise-Ready",
       "media_id": "18104715122340339",
       "trigger_keyword": "MCP"
+    },
+    {
+      "timestamp": "2026-10-13T23:08:58.659959+00:00",
+      "topic": "Why Your LLM App Lacks Observability",
+      "media_id": "18114656687031288",
+      "trigger_keyword": "LAMINAR"
     }
   ]
 }
