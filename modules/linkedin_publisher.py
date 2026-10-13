@@ -1,92 +1,79 @@
 import os
 import requests
-from config.settings import settings
-from core.logger import logger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class LinkedInPublisher:
-    """Publishes technical PDF document carousels to LinkedIn feeds."""
-
     def __init__(self):
-        self.access_token = settings.linkedin_access_token
-        self.author_urn = settings.linkedin_author_urn
+        self.access_token = os.getenv("LINKEDIN_ACCESS_TOKEN", "").strip()
+        self.author_urn = os.getenv("LINKEDIN_AUTHOR_URN", "").strip()
+        self.api_version = "202601"
         self.headers = {
             "Authorization": f"Bearer {self.access_token}",
+            "LinkedIn-Version": self.api_version,
             "X-Restli-Protocol-Version": "2.0.0",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
-    def publish_document(self, pdf_path: str, title: str, commentary: str) -> str:
-        if not self.access_token or not self.author_urn:
-            logger.info("LinkedIn: Credentials not set in settings. Skipping LinkedIn syndication.")
-            return ""
-
-        if not os.path.exists(pdf_path):
-            logger.error(f"LinkedIn: Target PDF not found at {pdf_path}")
-            return ""
-
-        logger.info(f"LinkedIn: Initializing document upload for '{title}'...")
-
-        # Step 1: Register upload with LinkedIn Asset API
-        init_url = "https://api.linkedin.com/v2/assets?action=registerUpload"
-        init_payload = {
-            "registerUploadRequest": {
-                "recipes": ["urn:li:digitalmediaRecipe:feedshare-document"],
-                "owner": self.author_urn,
-                "serviceRelationships": [
-                    {"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}
-                ]
+    def initialize_document_upload(self) -> tuple[str, str]:
+        """Step 1: Reserve a document asset URN and get an upload URL."""
+        url = "https://api.linkedin.com/rest/documents?action=initializeUpload"
+        payload = {
+            "initializeUploadRequest": {
+                "owner": self.author_urn
             }
         }
+        res = requests.post(url, headers=self.headers, json=payload)
+        res.raise_for_status()
+        data = res.json()["value"]
+        return data["uploadUrl"], data["document"]
 
-        init_res = requests.post(init_url, json=init_payload, headers=self.headers).json()
-        if "value" not in init_res:
-            logger.error(f"LinkedIn upload registration failed: {init_res}")
-            return ""
-
-        upload_url = init_res["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
-        asset_urn = init_res["value"]["asset"]
-
-        # Step 2: Upload raw PDF bytes
-        logger.info("LinkedIn: Uploading document binary...")
+    def upload_pdf_binary(self, upload_url: str, pdf_path: str):
+        """Step 2: Stream the binary PDF file to LinkedIn storage."""
         with open(pdf_path, "rb") as f:
-            upload_res = requests.put(
-                upload_url,
-                data=f,
-                headers={"Authorization": f"Bearer {self.access_token}"}
-            )
+            pdf_bytes = f.read()
 
-        if upload_res.status_code not in [200, 201]:
-            logger.error(f"LinkedIn binary upload failed with status {upload_res.status_code}")
-            return ""
+        upload_headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/octet-stream",
+        }
+        res = requests.put(upload_url, headers=upload_headers, data=pdf_bytes)
+        res.raise_for_status()
 
-        # Step 3: Create UGC Post with document attachment
-        logger.info("LinkedIn: Publishing document post to feed...")
-        share_url = "https://api.linkedin.com/v2/ugcPosts"
-        post_payload = {
+    def create_document_post(self, document_urn: str, caption: str, title: str) -> str:
+        """Step 3: Publish the post referencing the uploaded document."""
+        url = "https://api.linkedin.com/rest/posts"
+        payload = {
             "author": self.author_urn,
-            "lifecycleState": "PUBLISHED",
-            "specificContent": {
-                "com.linkedin.ugc.ShareContent": {
-                    "shareCommentary": {"text": commentary},
-                    "shareMediaCategory": "DOCUMENT",
-                    "media": [
-                        {
-                            "status": "READY",
-                            "description": {"text": commentary[:200]},
-                            "media": asset_urn,
-                            "title": {"text": title}
-                        }
-                    ]
+            "commentary": caption,
+            "visibility": "PUBLIC",
+            "distribution": {
+                "feedDistribution": "MAIN_FEED",
+                "targetEntities": [],
+                "thirdPartyDistributionChannels": []
+            },
+            "content": {
+                "media": {
+                    "title": title,
+                    "id": document_urn
                 }
             },
-            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"}
+            "lifecycleState": "PUBLISHED"
         }
+        res = requests.post(url, headers=self.headers, json=payload)
+        res.raise_for_status()
+        return res.headers.get("x-restli-id", "urn:li:post:success")
 
-        post_res = requests.post(share_url, json=post_payload, headers=self.headers).json()
-        post_id = post_res.get("id", "")
-        if post_id:
-            logger.info(f"LinkedIn: Document published successfully! Post URN: {post_id}")
-        else:
-            logger.error(f"LinkedIn post creation failed: {post_res}")
-        return post_id
+    def publish_carousel(self, pdf_path: str, caption: str, title: str = "Carousel") -> str:
+        """Runs the full upload sequence and returns the published post URN."""
+        print(f"[LinkedIn] Initializing document upload for: {pdf_path}")
+        upload_url, document_urn = self.initialize_document_upload()
+
+        print(f"[LinkedIn] Uploading PDF binary to storage...")
+        self.upload_pdf_binary(upload_url, pdf_path)
+
+        print(f"[LinkedIn] Publishing feed post with document {document_urn}...")
+        post_urn = self.create_document_post(document_urn, caption, title)
+        return post_urn
