@@ -7,7 +7,8 @@
     },
     "Why Your RAG Pipeline Fails at Scale",
     "LangChain Agents: Why Most Crash in Production",
-    "Why Naive LLM Evaluation Fails in Production"
+    "Why Naive LLM Evaluation Fails in Production",
+    "Why LLM Monitoring Is NOT Optional"
   ],
   "logs": [
     {
@@ -25,6 +26,12 @@
       "topic": "Why Naive LLM Evaluation Fails in Production",
       "media_id": "18034327370895526",
       "trigger_keyword": "EVALS"
+    },
+    {
+      "timestamp": "2026-10-13T19:50:39.293060+00:00",
+      "topic": "Why LLM Monitoring Is NOT Optional",
+      "media_id": "18184592140422688",
+      "trigger_keyword": "MONITOR"
     }
   ]
 }
