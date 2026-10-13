@@ -8,7 +8,8 @@
     "Why Your RAG Pipeline Fails at Scale",
     "LangChain Agents: Why Most Crash in Production",
     "Why Naive LLM Evaluation Fails in Production",
-    "Why LLM Monitoring Is NOT Optional"
+    "Why LLM Monitoring Is NOT Optional",
+    "LLM “App Builders” Are NOT Enterprise-Ready"
   ],
   "logs": [
     {
@@ -32,6 +33,12 @@
       "topic": "Why LLM Monitoring Is NOT Optional",
       "media_id": "18184592140422688",
       "trigger_keyword": "MONITOR"
+    },
+    {
+      "timestamp": "2026-10-13T20:27:14.829563+00:00",
+      "topic": "LLM “App Builders” Are NOT Enterprise-Ready",
+      "media_id": "18104715122340339",
+      "trigger_keyword": "MCP"
     }
   ]
 }
