@@ -10,7 +10,8 @@
     "Why Naive LLM Evaluation Fails in Production",
     "Why LLM Monitoring Is NOT Optional",
     "LLM “App Builders” Are NOT Enterprise-Ready",
-    "Why Your LLM App Lacks Observability"
+    "Why Your LLM App Lacks Observability",
+    "Why LLM Hallucination Detection Breaks in Prod"
   ],
   "logs": [
     {
@@ -46,6 +47,12 @@
       "topic": "Why Your LLM App Lacks Observability",
       "media_id": "18114656687031288",
       "trigger_keyword": "LAMINAR"
+    },
+    {
+      "timestamp": "2026-10-14T19:04:11.686685+00:00",
+      "topic": "Why LLM Hallucination Detection Breaks in Prod",
+      "media_id": "17972269395173051",
+      "trigger_keyword": "HALLUCINATE"
     }
   ]
 }
