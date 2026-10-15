@@ -11,7 +11,8 @@
     "Why LLM Monitoring Is NOT Optional",
     "LLM “App Builders” Are NOT Enterprise-Ready",
     "Why Your LLM App Lacks Observability",
-    "Why LLM Hallucination Detection Breaks in Prod"
+    "Why LLM Hallucination Detection Breaks in Prod",
+    "Q&A LLM Testing: The Beginner’s Trap"
   ],
   "logs": [
     {
@@ -53,6 +54,12 @@
       "topic": "Why LLM Hallucination Detection Breaks in Prod",
       "media_id": "17972269395173051",
       "trigger_keyword": "HALLUCINATE"
+    },
+    {
+      "timestamp": "2026-10-15T18:47:22.624760+00:00",
+      "topic": "Q&A LLM Testing: The Beginner’s Trap",
+      "media_id": "18414727468083858",
+      "trigger_keyword": "TESTBED"
     }
   ]
 }
