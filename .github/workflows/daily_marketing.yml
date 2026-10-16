@@ -47,15 +47,9 @@ jobs:
       # 1. INSTALL SYSTEM DEPENDENCIES (FFmpeg for Video/Reel Compilation)
       # ===================================================================
       - name: Install FFmpeg
-<<<<<<< HEAD
-        uses: BtbN/FFmpeg-Builds@latest      
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-=======
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
->>>>>>> 81cb956 (fix: replace invalid ffmpeg-builds action with native apt-get ffmpeg install)
 
       # ===================================================================
       # 2. INSTALL PLAYWRIGHT SYSTEM LIBS (Required for Headless Chromium)
@@ -79,7 +73,6 @@ jobs:
       # ===================================================================
       - name: Run Autonomous Marketing Agent
         env:
-          # Reads interactive dropdown choices, falling back to 'video' / 'both' if triggered via cron schedule
           PUBLISH_FORMATS: ${{ github.event.inputs.publish_formats || 'video' }}
           PUBLISH_PLATFORMS: ${{ github.event.inputs.publish_platforms || 'both' }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
