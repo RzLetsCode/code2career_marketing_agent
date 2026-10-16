@@ -13,7 +13,8 @@
     "Why Your LLM App Lacks Observability",
     "Why LLM Hallucination Detection Breaks in Prod",
     "Q&A LLM Testing: The Beginner’s Trap",
-    "Browser-Based AI Model Inference"
+    "Browser-Based AI Model Inference",
+    "Gated On-Policy Distillation: Transferring RL-Induced Policy Shifts"
   ],
   "logs": [
     {
@@ -68,6 +69,13 @@
       "pillar": "Edge AI / Distributed Inference",
       "media_id": "17940416232380489",
       "trigger_keyword": "IN-BROWSER"
+    },
+    {
+      "timestamp": "2026-10-16T18:38:34.377070+00:00",
+      "topic": "Gated On-Policy Distillation: Transferring RL-Induced Policy Shifts",
+      "pillar": "AI Mathematics & Distributed Policy Engineering",
+      "media_id": "18073671998768725",
+      "trigger_keyword": "WAYPOINT-OPD"
     }
   ]
 }
