@@ -1,10 +1,31 @@
-name: Daily Autonomous Instagram Marketing
+name: Daily Autonomous Instagram & LinkedIn Marketing
 
 on:
   schedule:
-    # 15:00 UTC = 8:30 PM IST
+    # 15:00 UTC = 8:30 PM IST (Peak Developer Engagement Window)
     - cron: '0 15 * * *'
   workflow_dispatch:
+    inputs:
+      publish_formats:
+        description: 'Content Formats to Generate & Publish'
+        required: true
+        default: 'video'
+        type: choice
+        options:
+          - carousel
+          - video
+          - both
+          - none
+      publish_platforms:
+        description: 'Target Social Platforms'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - instagram
+          - linkedin
+          - none
 
 jobs:
   run-agent:
@@ -16,23 +37,45 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
+      # ===================================================================
+      # 1. INSTALL SYSTEM DEPENDENCIES (FFmpeg for Video/Reel Compilation)
+      # ===================================================================
+      - name: Install FFmpeg
+        uses: BtbN/FFmpeg-Builds@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ===================================================================
+      # 2. INSTALL PLAYWRIGHT SYSTEM LIBS (Required for Headless Chromium)
+      # ===================================================================
+      - name: Install Playwright System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 alsa-lib
+
+      # ===================================================================
+      # 3. INSTALL PYTHON PACKAGES & PLAYWRIGHT BROWSERS
+      # ===================================================================
       - name: Install Python Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Install Playwright Chromium
-        run: |
           playwright install chromium
 
-      - name: Execute Autonomous Marketing Agent
+      # ===================================================================
+      # 4. EXECUTE AUTONOMOUS MARKETING PIPELINE
+      # ===================================================================
+      - name: Run Autonomous Marketing Agent
         env:
+          # Reads interactive dropdown choices, falling back to 'carousel' / 'both' if triggered via cron schedule
+          PUBLISH_FORMATS: ${{ github.event.inputs.publish_formats || 'carousel' }}
+          PUBLISH_PLATFORMS: ${{ github.event.inputs.publish_platforms || 'both' }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
@@ -47,6 +90,9 @@ jobs:
         run: |
           python -u orchestrator.py
 
+      # ===================================================================
+      # 5. COMMIT STATE HISTORY BACK TO REPOSITORY
+      # ===================================================================
       - name: Commit State History Back to Repo
         run: |
           git config --global user.name "github-actions[bot]"

@@ -5,6 +5,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from config.settings import settings
 from core.logger import logger
 
+
 class CloudinaryUploader:
     def __init__(self):
         cloudinary.config(
@@ -35,6 +36,23 @@ class CloudinaryUploader:
             urls.append(secure_url)
         logger.info("Cloudinary: All slides uploaded successfully.")
         return urls
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=3, max=15))
+    def upload_video(self, video_path: str) -> str:
+        """Uploads a rendered MP4 Reel to Cloudinary and returns its secure HTTPS URL."""
+        logger.info(f"Cloudinary: Uploading MP4 video ({video_path}) to cloud storage...")
+        res = cloudinary.uploader.upload(
+            video_path,
+            folder="c2c_automated_reels",
+            overwrite=True,
+            resource_type="video"
+        )
+        url = res.get("secure_url")
+        if not url:
+            raise ValueError(f"Cloudinary did not return a secure_url for video {video_path}")
+        logger.info(f"Cloudinary: Video uploaded successfully -> {url}")
+        return url
+
 
 # Export both names to prevent import mismatches
 Uploader = CloudinaryUploader
