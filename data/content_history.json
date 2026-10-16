@@ -12,7 +12,8 @@
     "LLM “App Builders” Are NOT Enterprise-Ready",
     "Why Your LLM App Lacks Observability",
     "Why LLM Hallucination Detection Breaks in Prod",
-    "Q&A LLM Testing: The Beginner’s Trap"
+    "Q&A LLM Testing: The Beginner’s Trap",
+    "Browser-Based AI Model Inference"
   ],
   "logs": [
     {
@@ -60,6 +61,13 @@
       "topic": "Q&A LLM Testing: The Beginner’s Trap",
       "media_id": "18414727468083858",
       "trigger_keyword": "TESTBED"
+    },
+    {
+      "timestamp": "2026-10-16T11:07:25.699684+00:00",
+      "topic": "Browser-Based AI Model Inference",
+      "pillar": "Edge AI / Distributed Inference",
+      "media_id": "17940416232380489",
+      "trigger_keyword": "IN-BROWSER"
     }
   ]
 }
