@@ -47,7 +47,7 @@ jobs:
       # 1. INSTALL SYSTEM DEPENDENCIES (FFmpeg for Video/Reel Compilation)
       # ===================================================================
       - name: Install FFmpeg
-        uses: BtbN/FFmpeg-Builds@main
+        uses: BtbN/FFmpeg-Builds@latest      
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
