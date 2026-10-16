@@ -46,11 +46,10 @@ jobs:
       # ===================================================================
       # 1. INSTALL SYSTEM DEPENDENCIES (FFmpeg for Video/Reel Compilation)
       # ===================================================================
-      - name: Install FFmpeg
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
+          sudo apt-get install -y ffmpeg libpango1.0-dev libcairo2-dev pkg-config
       # ===================================================================
       # 2. INSTALL PLAYWRIGHT SYSTEM LIBS (Required for Headless Chromium)
       # ===================================================================
