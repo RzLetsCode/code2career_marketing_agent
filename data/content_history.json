@@ -14,7 +14,8 @@
     "Why LLM Hallucination Detection Breaks in Prod",
     "Q&A LLM Testing: The Beginner’s Trap",
     "Browser-Based AI Model Inference",
-    "Gated On-Policy Distillation: Transferring RL-Induced Policy Shifts"
+    "Gated On-Policy Distillation: Transferring RL-Induced Policy Shifts",
+    "Spatial Attention Matching in System One Agents"
   ],
   "logs": [
     {
@@ -76,6 +77,13 @@
       "pillar": "AI Mathematics & Distributed Policy Engineering",
       "media_id": "18073671998768725",
       "trigger_keyword": "WAYPOINT-OPD"
+    },
+    {
+      "timestamp": "2026-10-17T17:48:35.382835+00:00",
+      "topic": "Spatial Attention Matching in System One Agents",
+      "pillar": "LLM + Agent Systems",
+      "media_id": "18120551216284480",
+      "trigger_keyword": "SPATIAL_ATTENTION"
     }
   ]
 }
